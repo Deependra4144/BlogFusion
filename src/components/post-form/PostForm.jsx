@@ -18,34 +18,40 @@ function PostForm({ post }) {
     const navigate = useNavigate()
     const userData = useSelector(state => state.auth.userData)
     const [imagePreview, setImagePreview] = useState('')
+
+    const handleInputImage = (e) => {
+        let file = e.target.files[0]
+        setValue("featuredImage", e.target.files, { shouldValidate: true })
+        let imageURL = URL.createObjectURL(file)
+        setImagePreview(imageURL)
+    }
+
     const submit = async (data) => {
         console.log("Form Data:", data);
 
-        let fileId = post?.featuredImage || null; // Ensure `fileId` is always set
+        let fileId = post?.featuredImage || null;
 
-        if (data.image && data.image[0]) {
+        if (data.featuredImage && data.featuredImage[0]) {
             try {
-                const file = await appwriteService.uploadFile(data.image[0]);
+                const file = await appwriteService.uploadFile(data.featuredImage[0]);
                 if (file) {
-                    fileId = file.$id;
-
+                    fileId = file.$id
                     if (post?.featuredImage) {
                         await appwriteService.deleteFile(post.featuredImage);
                     }
                 }
             } catch (error) {
                 console.error("File upload failed:", error);
-                return; // Stop submission if file upload fails
+                return;
             }
         }
 
         try {
             const payload = {
                 ...data,
-                featuredImage: fileId || "", // Ensure `featuredImage` is never missing
+                featuredImage: fileId || "",
                 userId: userData?.$id,
             };
-
             const dbPost = post
                 ? await appwriteService.updatePost(post.$id, payload)
                 : await appwriteService.createPost(payload);
@@ -57,13 +63,7 @@ function PostForm({ post }) {
             console.error("Appwrite service :: createPost :: error", error);
         }
     };
-    const handleInputImage = (e) => {
-        let file = e.target.files[0]
-        setValue("image", e.target.files, { shouldValidate: true })
-        let imageURL = URL.createObjectURL(file)
-        setImagePreview(imageURL)
-        console.log(imageURL)
-    }
+
     const slugTransform = useCallback((value) => {
         if (value && typeof value === 'string')
             return value

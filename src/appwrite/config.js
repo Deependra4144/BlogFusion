@@ -73,9 +73,11 @@ export class Service {
 
     async uploadFile(file) {
         try {
+            console.log('image is upload successfully', 1)
             return await this.bucket.createFile(conf.appwriteBucketId, ID.unique(), file)
         } catch (error) {
             console.log("Appwrite service :: uploadFile :: error", error)
+            return null;
         }
     }
 
@@ -91,7 +93,7 @@ export class Service {
 
     filePreview(fileId) {
         try {
-            return this.bucket.getFilePreview(conf.appwriteBucketId, fileId)
+            return this.bucket.getFileView(conf.appwriteBucketId, fileId)
         } catch (error) {
             console.log("Appwrite service :: filePreview :: error", error)
             return false
